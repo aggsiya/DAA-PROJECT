@@ -1,50 +1,74 @@
 <?php
-    session_start();
-    include("db.php");
-    if($_SERVER['REQUEST_METHOD']=="POST")
-    {
-        $Username=$_POST['Username'];
-        $Email=$_POST['Email'];
-        $Password=$_POST['Password'];
-        if(!empty($Email) && !empty($Password) && !is_null($Email)){
-            $query="insert into form (Username,Email,Password) values ('$Username' ,'$Email' , 'Password')";
+session_start();
+include("db.php");
 
-            mysqli_query($con,$query);
+if ($_SERVER['REQUEST_METHOD'] == "POST" && isset($_POST['form_type'])) {
+    $form_type = $_POST['form_type'];
 
-            echo "<script type='text/javascript'> alret('Sucessfully Register')</script>";
+    if ($form_type === "register") {
+        $username = $_POST['uname'];
+        $gmail = $_POST['mail'];
+        $password = $_POST['pass'];
 
-        }
-        else{
-            echo "<script type='text/javascript'> alret('Please Enter some Valid Information')</script>";
+        if (!empty($gmail) && !empty($password) && !is_numeric($gmail)) {
+            $query = "INSERT INTO reg (uname, mail, pass) VALUES ('$username', '$gmail', '$password')";
+            mysqli_query($con, $query);
+            echo "<script>alert('Successfully Registered');</script>";
+        } else {
+            echo "<script>alert('Please enter some valid information');</script>";
         }
     }
 
- ?>   
-  
+    if ($form_type === "login") {
+        $gmail = $_POST['mail'];
+        $password = $_POST['pass'];
+
+        if (!empty($gmail) && !empty($password) && !is_numeric($gmail)) {
+            $query = "SELECT * FROM reg WHERE mail = '$gmail' LIMIT 1";
+            $result = mysqli_query($con, $query);
+
+            if ($result && mysqli_num_rows($result) > 0) {
+                $user_data = mysqli_fetch_assoc($result);
+
+                if ($user_data['pass'] == $password) {
+                    $_SESSION['user_id'] = $user_data['id'];
+                    header("Location: index.html");
+                    exit;
+                }
+            }
+            echo "<script>alert('Wrong email or password');</script>";
+        } else {
+            echo "<script>alert('Wrong email or password');</script>";
+        }
+    }
+}
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
+    <title>Login/Register</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins&display=swap" rel="stylesheet">
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
     <link rel="stylesheet" href="login.css">
 </head>
 <body>
     <div class="container">
+        <!-- Login Form -->
         <div class="form-box login">
-            <form action="">
+            <form method="POST">
+                <input type="hidden" name="form_type" value="login">
                 <h1>Login</h1>
                 <div class="input-box">
-                    <input type="text" placeholder="Username" required>
-                    <i class='bx bxs-user' ></i>
+                    <label>Email</label>
+                    <input type="email" name="mail" required>
+                    <i class='bx bxs-user'></i>
                 </div>
                 <div class="input-box">
-                    <input type="password" placeholder="Password" required>
-                    <i class='bx bxs-lock-alt' ></i>
+                    <label>Password</label>
+                    <input type="password" name="pass" required>
+                    <i class='bx bxs-lock-alt'></i>
                 </div>
                 <div class="forgot-link">
                     <a href="#">Forgot Password?</a>
@@ -52,39 +76,46 @@
                 <button type="submit" class="btn">Login</button>
                 <p>or login with social platforms</p>
                 <div class="social-icons">
-                    <a href="#"><i class='bx bxl-google' ></i></a>
-                    <a href="#"><i class='bx bxl-facebook' ></i></a>
-                    <a href="#"><i class='bx bxl-github' ></i></a>
-                    <a href="#"><i class='bx bxl-linkedin' ></i></a>
-                </div>
-            </form>
-        </div>
-        <div class="form-box register">
-            <form method="POST">
-                <h1>Registration</h1>
-                <div class="input-box">
-                    <input type="text" placeholder="Username" required>
-                    <i class='bx bxs-user' ></i>
-                </div>
-                <div class="input-box">
-                    <input type="email" placeholder="Email" required>
-                    <i class='bx bxs-envelope' ></i>
-                </div>
-                <div class="input-box">
-                    <input type="password" placeholder="Password" required>
-                    <i class='bx bxs-lock-alt' ></i>
-                </div>
-                <button type="submit" class="btn">Register</button>
-                <p>or register with social platforms</p>
-                <div class="social-icons">
-                    <a href="#"><i class='bx bxl-google' ></i></a>
-                    <a href="#"><i class='bx bxl-facebook' ></i></a>
-                    <a href="#"><i class='bx bxl-github' ></i></a>
-                    <a href="#"><i class='bx bxl-linkedin' ></i></a>
+                    <a href="#"><i class='bx bxl-google'></i></a>
+                    <a href="#"><i class='bx bxl-facebook'></i></a>
+                    <a href="#"><i class='bx bxl-github'></i></a>
+                    <a href="#"><i class='bx bxl-linkedin'></i></a>
                 </div>
             </form>
         </div>
 
+        <!-- Registration Form -->
+        <div class="form-box register">
+            <form method="POST">
+                <input type="hidden" name="form_type" value="register">
+                <h1>Registration</h1>
+                <div class="input-box">
+                    <label>Username</label>
+                    <input type="text" name="uname" required>
+                    <i class='bx bxs-user'></i>
+                </div>
+                <div class="input-box">
+                    <label>Email</label>
+                    <input type="email" name="mail" required>
+                    <i class='bx bxs-envelope'></i>
+                </div>
+                <div class="input-box">
+                    <label>Password</label>
+                    <input type="password" name="pass" required>
+                    <i class='bx bxs-lock-alt'></i>
+                </div>
+                <button type="submit" class="btn">Register</button>
+                <p>or register with social platforms</p>
+                <div class="social-icons">
+                    <a href="#"><i class='bx bxl-google'></i></a>
+                    <a href="#"><i class='bx bxl-facebook'></i></a>
+                    <a href="#"><i class='bx bxl-github'></i></a>
+                    <a href="#"><i class='bx bxl-linkedin'></i></a>
+                </div>
+            </form>
+        </div>
+
+        <!-- Toggle Panel -->
         <div class="toggle-box">
             <div class="toggle-panel toggle-left">
                 <h1>Hello, Welcome</h1>
@@ -103,3 +134,4 @@
     <script src="login.js"></script>
 </body>
 </html>
+

@@ -13,7 +13,7 @@ public class SecurityConfig {
         http
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/login").permitAll() // Allow login page without authentication
-                .requestMatchers("/css/**", "/js/**", "/images/**").permitAll() // Allow access to static resources
+                .requestMatchers("/css/**", "/js/**", "/img/**").permitAll() // Allow access to static resources
                 .anyRequest().authenticated() // Authenticate other requests
             )
             .formLogin(form -> form

@@ -1,30 +1,73 @@
+<?php
+session_start();
+include("db.php");
+
+if ($_SERVER['REQUEST_METHOD'] == "POST" && isset($_POST['form_type'])) {
+    $form_type = $_POST['form_type'];
+
+    if ($form_type === "register") {
+        $username = $_POST['uname'];
+        $gmail = $_POST['mail'];
+        $password = $_POST['pass'];
+
+        if (!empty($gmail) && !empty($password) && !is_numeric($gmail)) {
+            $query = "INSERT INTO reg (uname, mail, pass) VALUES ('$username', '$gmail', '$password')";
+            mysqli_query($con, $query);
+            echo "<script>alert('Successfully Registered');</script>";
+        } else {
+            echo "<script>alert('Please enter some valid information');</script>";
+        }
+    }
+
+    if ($form_type === "login") {
+        $gmail = $_POST['mail'];
+        $password = $_POST['pass'];
+
+        if (!empty($gmail) && !empty($password) && !is_numeric($gmail)) {
+            $query = "SELECT * FROM reg WHERE mail = '$gmail' LIMIT 1";
+            $result = mysqli_query($con, $query);
+
+            if ($result && mysqli_num_rows($result) > 0) {
+                $user_data = mysqli_fetch_assoc($result);
+
+                if ($user_data['pass'] == $password) {
+                    $_SESSION['user_id'] = $user_data['id'];
+                    header("Location: index.html");
+                    exit;
+                }
+            }
+            echo "<script>alert('Wrong email or password');</script>";
+        } else {
+            echo "<script>alert('Wrong email or password');</script>";
+        }
+    }
+}
+?>
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login/Register</title>
-
-    <!-- Fonts and Icons -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins&display=swap" rel="stylesheet">
-    <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
-
-<link rel="stylesheet" href="/css/login.css">
-
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    <link rel="stylesheet" href="login.css">
 </head>
 <body>
     <div class="container">
+        <!-- Login Form -->
         <div class="form-box login">
-            <form th:action="@{/login}" method="post">
+            <form method="POST">
+                <input type="hidden" name="form_type" value="login">
                 <h1>Login</h1>
                 <div class="input-box">
-                    <input type="text" name="username" placeholder="Username" required>
+                    <label>Email</label>
+                    <input type="email" name="mail" required>
                     <i class='bx bxs-user'></i>
                 </div>
                 <div class="input-box">
-                    <input type="password" name="password" placeholder="Password" required>
+                    <label>Password</label>
+                    <input type="password" name="pass" required>
                     <i class='bx bxs-lock-alt'></i>
                 </div>
                 <div class="forgot-link">
@@ -41,19 +84,24 @@
             </form>
         </div>
 
+        <!-- Registration Form -->
         <div class="form-box register">
-            <form th:action="@{/register}" method="post">
+            <form method="POST">
+                <input type="hidden" name="form_type" value="register">
                 <h1>Registration</h1>
                 <div class="input-box">
-                    <input type="text" name="username" placeholder="Username" required>
+                    <label>Username</label>
+                    <input type="text" name="uname" required>
                     <i class='bx bxs-user'></i>
                 </div>
                 <div class="input-box">
-                    <input type="email" name="email" placeholder="Email" required>
+                    <label>Email</label>
+                    <input type="email" name="mail" required>
                     <i class='bx bxs-envelope'></i>
                 </div>
                 <div class="input-box">
-                    <input type="password" name="password" placeholder="Password" required>
+                    <label>Password</label>
+                    <input type="password" name="pass" required>
                     <i class='bx bxs-lock-alt'></i>
                 </div>
                 <button type="submit" class="btn">Register</button>
@@ -67,6 +115,7 @@
             </form>
         </div>
 
+        <!-- Toggle Panel -->
         <div class="toggle-box">
             <div class="toggle-panel toggle-left">
                 <h1>Hello, Welcome</h1>
@@ -81,7 +130,8 @@
             </div>
         </div>
     </div>
-<script src="/js/login.js"></script>
 
+    <script src="login.js"></script>
 </body>
 </html>
+

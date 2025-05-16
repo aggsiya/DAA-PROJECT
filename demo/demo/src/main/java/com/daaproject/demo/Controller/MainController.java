@@ -15,4 +15,21 @@ public class MainController {
     public String welcome() {
         return "welcome";
     }
+    @GetMapping("/about.html")
+    public String aboutPage() {
+        return "about";
+    }
+
+    @GetMapping("/login.html")
+    public String loginPage() {
+        return "login";  
+    }
+    @GetMapping("/book.html")
+    public String bookTripPage() {
+        return "book"; 
+    }
+    @GetMapping("/welcome.html")
+    public String welcomePage() {
+        return "welcome";
+    }
 }

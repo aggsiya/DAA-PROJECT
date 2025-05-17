@@ -32,7 +32,7 @@ if ($_SERVER['REQUEST_METHOD'] == "POST" && isset($_POST['form_type'])) {
 
                 if ($user_data['pass'] == $password) {
                     $_SESSION['user_id'] = $user_data['id'];
-                    header("Location: index.html");
+                    header("Location: welcome.html");
                     exit;
                 }
             }
